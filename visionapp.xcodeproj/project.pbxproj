@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD4436772D6CF3A70081267A /* YOLOv3.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = CD4436762D6CF3A60081267A /* YOLOv3.mlmodel */; };
+		CD5B8C2A2D53D32F002A201F /* MotionGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD5B8C292D53D32F002A201F /* MotionGraphView.swift */; };
+		CD5B8C2C2D53D8C6002A201F /* BoundingBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD5B8C2B2D53D8C6002A201F /* BoundingBoxView.swift */; };
 		CD82825B2D3ABEA200A0CC2F /* visionappApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD82825A2D3ABEA200A0CC2F /* visionappApp.swift */; };
 		CD82825D2D3ABEA200A0CC2F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD82825C2D3ABEA200A0CC2F /* ContentView.swift */; };
 		CD82825F2D3ABEA600A0CC2F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CD82825E2D3ABEA600A0CC2F /* Assets.xcassets */; };
@@ -16,6 +19,7 @@
 		CD8282792D3ABEA700A0CC2F /* visionappUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8282782D3ABEA700A0CC2F /* visionappUITestsLaunchTests.swift */; };
 		CD8282862D3AC1BC00A0CC2F /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8282852D3AC1BC00A0CC2F /* CameraManager.swift */; };
 		CD8282882D3ACCEC00A0CC2F /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8282872D3ACCEC00A0CC2F /* CameraPreview.swift */; };
+		CDA4FC5D2D4D38E200CA5587 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDA4FC5C2D4D38E200CA5587 /* VisionProcessor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +54,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CD4436762D6CF3A60081267A /* YOLOv3.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3.mlmodel; sourceTree = "<group>"; };
+		CD5B8C292D53D32F002A201F /* MotionGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGraphView.swift; sourceTree = "<group>"; };
+		CD5B8C2B2D53D8C6002A201F /* BoundingBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoundingBoxView.swift; sourceTree = "<group>"; };
 		CD8282572D3ABEA200A0CC2F /* visionapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = visionapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD82825A2D3ABEA200A0CC2F /* visionappApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = visionappApp.swift; sourceTree = "<group>"; };
 		CD82825C2D3ABEA200A0CC2F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -63,6 +70,7 @@
 		CD8282782D3ABEA700A0CC2F /* visionappUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = visionappUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		CD8282852D3AC1BC00A0CC2F /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		CD8282872D3ACCEC00A0CC2F /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		CDA4FC5C2D4D38E200CA5587 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		CDAB17172D43FE62005E44A8 /* iosVisionApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosVisionApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDAB17262D43FE63005E44A8 /* iosVisionAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iosVisionAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDAB17302D43FE63005E44A8 /* iosVisionAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iosVisionAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +152,10 @@
 				CD82825C2D3ABEA200A0CC2F /* ContentView.swift */,
 				CD8282852D3AC1BC00A0CC2F /* CameraManager.swift */,
 				CD8282872D3ACCEC00A0CC2F /* CameraPreview.swift */,
+				CDA4FC5C2D4D38E200CA5587 /* VisionProcessor.swift */,
+				CD5B8C292D53D32F002A201F /* MotionGraphView.swift */,
+				CD5B8C2B2D53D8C6002A201F /* BoundingBoxView.swift */,
+				CD4436762D6CF3A60081267A /* YOLOv3.mlmodel */,
 				CD82825E2D3ABEA600A0CC2F /* Assets.xcassets */,
 				CD8282602D3ABEA600A0CC2F /* visionapp.entitlements */,
 				CD8282612D3ABEA600A0CC2F /* Preview Content */,
@@ -395,9 +407,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				CD8282882D3ACCEC00A0CC2F /* CameraPreview.swift in Sources */,
+				CD5B8C2C2D53D8C6002A201F /* BoundingBoxView.swift in Sources */,
+				CD4436772D6CF3A70081267A /* YOLOv3.mlmodel in Sources */,
 				CD82825D2D3ABEA200A0CC2F /* ContentView.swift in Sources */,
 				CD8282862D3AC1BC00A0CC2F /* CameraManager.swift in Sources */,
+				CDA4FC5D2D4D38E200CA5587 /* VisionProcessor.swift in Sources */,
 				CD82825B2D3ABEA200A0CC2F /* visionappApp.swift in Sources */,
+				CD5B8C2A2D53D32F002A201F /* MotionGraphView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

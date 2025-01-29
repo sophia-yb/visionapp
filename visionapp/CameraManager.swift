@@ -12,7 +12,7 @@ import SwiftUI
 
 class CameraManager: NSObject, ObservableObject {
     private let captureSession = AVCaptureSession()
-    
+    private let visionProcessor = VisionProcessor()
     
     @Published var previewLayer: AVCaptureVideoPreviewLayer?
     @Published var isCameraRunning = false
@@ -36,6 +36,17 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
+    func updatePreviewLayerFrame() {
+        DispatchQueue.main.async {
+            guard let previewLayer = self.previewLayer else {return}
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                previewLayer.frame = window.bounds
+                // print("Updated preview layer frame to: \(previewLayer.frame)")
+            }
+        }
+    }
+    
     
     //Sets up the capture session with the default camera.
     func setUpCaptureSession() async {
@@ -44,7 +55,6 @@ class CameraManager: NSObject, ObservableObject {
             return
         }
         
-        print("Starting camera session configuration")
         // Start configuring the session
         captureSession.beginConfiguration()
         
@@ -60,36 +70,39 @@ class CameraManager: NSObject, ObservableObject {
             return
         }
         
+        let videoOutput = AVCaptureVideoDataOutput()
+        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+        }
         
         captureSession.addInput(videoDeviceInput)
         captureSession.commitConfiguration()
         
-        print("Capture session configured successfully")
-        
         // Set up the preview layer on the main thread
         DispatchQueue.main.async {
-            let layer = AVCaptureVideoPreviewLayer(session: self.captureSession)
-            layer.videoGravity = .resizeAspectFill
-            self.previewLayer = layer
-            print("Preview Layer assigned: \(self.previewLayer != nil ? "Yes" : "No")")
+            self.previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
+            self.previewLayer?.videoGravity = .resizeAspectFill
+            self.updatePreviewLayerFrame()
         }
     }
     
     
     //Starts the camera session.
     func startSession() {
-        DispatchQueue.global(qos: .userInitiated).async { // Run on a background thread
+        DispatchQueue.global(qos: .background).async {
             if !self.captureSession.isRunning {
                 self.captureSession.startRunning()
                 DispatchQueue.main.async {
                     self.isCameraRunning = true
-                    print("Camera session started")
+                    self.updatePreviewLayerFrame() // Ensure preview layer updates
                 }
             } else {
-                print("Camera session is already running")
+                print("⚠️ Camera session was already running")
             }
         }
     }
+
 
     
     
@@ -106,5 +119,10 @@ class CameraManager: NSObject, ObservableObject {
                 print("Camera session was not running")
             }
         }
+    }
+}
+extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        visionProcessor.processFrame(sampleBuffer) // Send frames to Vision
     }
 }
