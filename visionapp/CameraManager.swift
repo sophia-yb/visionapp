@@ -44,7 +44,6 @@ class CameraManager: NSObject, ObservableObject {
             return
         }
         
-        print("Starting camera session configuration")
         // Start configuring the session
         captureSession.beginConfiguration()
         
@@ -64,14 +63,11 @@ class CameraManager: NSObject, ObservableObject {
         captureSession.addInput(videoDeviceInput)
         captureSession.commitConfiguration()
         
-        print("Capture session configured successfully")
-        
         // Set up the preview layer on the main thread
         DispatchQueue.main.async {
             let layer = AVCaptureVideoPreviewLayer(session: self.captureSession)
             layer.videoGravity = .resizeAspectFill
             self.previewLayer = layer
-            print("Preview Layer assigned: \(self.previewLayer != nil ? "Yes" : "No")")
         }
     }
     
@@ -83,10 +79,7 @@ class CameraManager: NSObject, ObservableObject {
                 self.captureSession.startRunning()
                 DispatchQueue.main.async {
                     self.isCameraRunning = true
-                    print("Camera session started")
                 }
-            } else {
-                print("Camera session is already running")
             }
         }
     }
