@@ -10,7 +10,7 @@ import AVFoundation
 import SwiftUI
 
 
-class CameraManager: NSObject, ObservableObject {
+class CameraManager: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     private let captureSession = AVCaptureSession()
     private let visionProcessor = VisionProcessor()
     
@@ -95,10 +95,14 @@ class CameraManager: NSObject, ObservableObject {
                 self.captureSession.startRunning()
                 DispatchQueue.main.async {
                     self.isCameraRunning = true
+<<<<<<< HEAD
                     self.updatePreviewLayerFrame() // Ensure preview layer updates
                 }
             } else {
                 print("⚠️ Camera session was already running")
+=======
+                }
+>>>>>>> 2bb2eb7 (camera works - 1/29/25)
             }
         }
     }
