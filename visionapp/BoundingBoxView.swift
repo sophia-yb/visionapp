@@ -20,7 +20,7 @@ struct BoundingBoxView: View {
         let width = max(2, min(box.width * screenSize.width, screenSize.width - x))
         let height = max(2, min(box.height * screenSize.height, screenSize.height - y))
 
-        print("Drawing BoundingBoxView: \(object.label), x=\(x), y=\(y), width=\(width), height=\(height)")
+        print("🟥 BoundingBoxView initialized for \(object.label) at x=\(x), y=\(y), width=\(width), height=\(height)")
         
         return ZStack {
             Rectangle()

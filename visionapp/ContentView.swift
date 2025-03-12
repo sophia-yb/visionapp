@@ -11,7 +11,7 @@ import AVFoundation
 
 struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
-    @StateObject private var visionProcessor = VisionProcessor()
+    @StateObject var visionProcessor = VisionProcessor()
     
     // Motion Data
     @State private var velocityData: [(time: Double, value: Double)] = []
@@ -30,29 +30,27 @@ struct ContentView: View {
                 Text("Camera not available")
             }
             
-            Rectangle()
-                .stroke(Color.blue, lineWidth: 3)
-                .frame(width: 100, height: 100)
-                .position(x: 200, y: 400)
-            
             let screenSize = UIScreen.main.bounds.size
-            ForEach(visionProcessor.detectedObjects, id: \.id) { object in
-                //print("📦 SwiftUI detected object for BoundingBoxView: \(object.label) at \(object.boundingBox)")
-                BoundingBoxView(object: object, screenSize: screenSize)
-            }
-
-            // Overlay: Show camera state
+            
             VStack {
-                // Velocity graph
-//                MotionGraphView(motionData: visionProcessor.velocityData, title: "Velocity (px/s)")
-//                // Acceleration graph
-//                MotionGraphView(motionData: visionProcessor.accelerationData, title: "Acceleration (px/s^2)")
-                Spacer()
-                .padding()
+                Text("Detected Objects: \(visionProcessor.detectedObjects.count)")
+                    .foregroundColor(.white)
+                    .padding()
+                
+                if visionProcessor.detectedObjects.isEmpty {
+                    Text("❌ No objects detected").foregroundColor(.red)
+                } else {
+                    ForEach(Array(visionProcessor.detectedObjects), id: \.id) { object in
+                        Text("📦 Detected object: \(object.label)")
+                    }
+                }
             }
         }
         .onAppear {
             Task {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    print("🟢 UI Checking Detected Objects (Inside ContentView): \(visionProcessor.detectedObjects)")
+                }
                 await cameraManager.setUpCaptureSession()
                 cameraManager.startSession()
             }

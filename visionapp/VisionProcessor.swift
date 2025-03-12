@@ -10,11 +10,15 @@ import AVFoundation
 import CoreML
 import SwiftUI
 
-struct DetectedObject: Identifiable {
+struct DetectedObject: Identifiable, Equatable {
     let id = UUID() // Unique identifier for SwiftUI
     let label: String
     let confidence: Float
     let boundingBox: CGRect
+    
+    static func == (lhs: DetectedObject, rhs: DetectedObject) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
 class VisionProcessor: ObservableObject {
@@ -39,7 +43,7 @@ class VisionProcessor: ObservableObject {
         loadObjectDetectionModel()
     }
     
-    // Loads the MobileNetV2 model for general object detection
+    // Loads the model for general object detection
     
     private func loadObjectDetectionModel() {
         print("📢 Loading Yolov3 model for object detection")
@@ -77,7 +81,7 @@ class VisionProcessor: ObservableObject {
 
         let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             do {
                 try requestHandler.perform([request])
             } catch {
@@ -100,28 +104,32 @@ class VisionProcessor: ObservableObject {
 
         DispatchQueue.main.async {
             self.objectWillChange.send()
-            if !results.isEmpty {
-                self.detectedObjects = results.map { observation in
-                    DetectedObject( label: observation.labels.first?.identifier ?? "Unknown",
-                                    confidence: observation.confidence,
-                                    boundingBox: observation.boundingBox
-                    )
-                }
+            let newObjects = results.map { observation in
+                DetectedObject(
+                    label: observation.labels.first?.identifier ?? "Unknown",
+                    confidence: observation.confidence,
+                    boundingBox: observation.boundingBox
+                )
             }
             
-            if results.isEmpty {
-                // print("❌ No objects detected in the frame")
-            } else {
-                print("🟦 Detected Objects:")
-                for object in results {
-                    let label = object.labels.first?.identifier ?? "Unknown"
-                    let confidence = object.confidence
-                    let boundingBox = object.boundingBox
-                    print("   - Object: \(label), Confidence: \(confidence), Box: \(boundingBox)")
-                    print(" - Bounding Box (normalized): x=\(boundingBox.minX), y=\(boundingBox.minY), w=\(boundingBox.width), h=\(boundingBox.height)")
+            print("🟢 Updating detectedObjects - Current: \(self.detectedObjects.count), New: \(newObjects.count)")
+            self.detectedObjects = []
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                if newObjects != self.detectedObjects {
+                    self.detectedObjects = newObjects
                 }
             }
+                
         }
+                //                print("🟦 Detected Objects:")
+                //                for object in results {
+                //                    let label = object.labels.first?.identifier ?? "Unknown"
+                //                    let confidence = object.confidence
+                //                    let boundingBox = object.boundingBox
+                //                    print("   - Object: \(label), Confidence: \(confidence), Box: \(boundingBox)")
+                //                    print(" - Bounding Box (normalized): x=\(boundingBox.minX), y=\(boundingBox.minY), w=\(boundingBox.width), h=\(boundingBox.height)")
+                //                }
     }
 
 
