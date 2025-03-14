@@ -10,6 +10,7 @@ import AVFoundation
 import CoreML
 import SwiftUI
 
+//Creates a DetectedObject using the model with confidence and bounding box
 struct DetectedObject: Identifiable, Equatable {
     let id = UUID() // Unique identifier for SwiftUI
     let label: String
@@ -22,11 +23,12 @@ struct DetectedObject: Identifiable, Equatable {
 }
 
 class VisionProcessor: ObservableObject {
+    //Variables to set up model
     private var request: VNCoreMLRequest?
     private var model: VNCoreMLModel?
     
     
-    // Motion tracking data
+    // Motion tracking data (not used currently)
     @Published var velocityData: [(time: Double, value: Double)] = []
     @Published var accelerationData: [(time: Double, value: Double)] = []
     private var previousPosition: CGPoint?
@@ -35,10 +37,13 @@ class VisionProcessor: ObservableObject {
     
     
     // Object detection data
-    @Published var detectedObjects: [DetectedObject] = []
-    // @Published var selectedObject: VNRecognizedObjectObservation?
+    class DetectedObjectsList: ObservableObject {
+        @Published var objects: [DetectedObject] = []
+    }
+    @MainActor @StateObject var detectedObjectsList = DetectedObjectsList()
     
     
+    //Initially loads the model
     init() {
         loadObjectDetectionModel()
     }
@@ -65,12 +70,14 @@ class VisionProcessor: ObservableObject {
     
     // Processes a frame from the camera
     func processFrame(_ sampleBuffer: CMSampleBuffer) {
+        //Gets the individual image frames
         guard let request = self.request else { return }
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             print("❌ Failed to get image buffer from camera frame")
             return
         }
         
+        //Converts image to what model can process
         let ciImage = CIImage(cvPixelBuffer: imageBuffer)
         let context = CIContext()
         
@@ -80,8 +87,9 @@ class VisionProcessor: ObservableObject {
         }
 
         let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-
-        DispatchQueue.global(qos: .userInteractive).async {
+        
+        //Sends images to model to process
+        DispatchQueue.global(qos: .default).async {
             do {
                 try requestHandler.perform([request])
             } catch {
@@ -101,9 +109,10 @@ class VisionProcessor: ObservableObject {
         guard let results = request.results as? [VNRecognizedObjectObservation] else {
             return
         }
-
+        
+        //DispatchQueue - runs on main thread
         DispatchQueue.main.async {
-            self.objectWillChange.send()
+            //Creates a bounding box for the detected object
             let newObjects = results.map { observation in
                 DetectedObject(
                     label: observation.labels.first?.identifier ?? "Unknown",
@@ -112,45 +121,49 @@ class VisionProcessor: ObservableObject {
                 )
             }
             
-            print("🟢 Updating detectedObjects - Current: \(self.detectedObjects.count), New: \(newObjects.count)")
-            self.detectedObjects = []
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                if newObjects != self.detectedObjects {
-                    self.detectedObjects = newObjects
-                }
+            //Sends detected objects to UI to update
+            if newObjects != self.detectedObjectsList.objects {
+                self.objectWillChange.send()
+                self.detectedObjectsList.objects = []
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.detectedObjectsList.objects = newObjects
+                    //print("✅ UI should now update - detectedObjects count: \(self.detectedObjectsList.objects.count)")
             }
+        }
                 
         }
-                //                print("🟦 Detected Objects:")
-                //                for object in results {
-                //                    let label = object.labels.first?.identifier ?? "Unknown"
-                //                    let confidence = object.confidence
-                //                    let boundingBox = object.boundingBox
-                //                    print("   - Object: \(label), Confidence: \(confidence), Box: \(boundingBox)")
-                //                    print(" - Bounding Box (normalized): x=\(boundingBox.minX), y=\(boundingBox.minY), w=\(boundingBox.width), h=\(boundingBox.height)")
-                //                }
+        
+        //Prints the bounding box for each detected Object
+        print("🟦 Detected Objects:")
+        for object in results {
+            let label = object.labels.first?.identifier ?? "Unknown"
+            let confidence = object.confidence
+            let boundingBox = object.boundingBox
+            print("   - Object: \(label), Confidence: \(confidence), Box: \(boundingBox)")
+            //print(" - Bounding Box (normalized): x=\(boundingBox.minX), y=\(boundingBox.minY), w=\(boundingBox.width), h=\(boundingBox.height)")
+        }
     }
 
 
-    // Tracks motion of the selected object
+    // Tracks motion of the selected object (NOT USED CURRENTLY)
     private func trackMotion(of object: VNRecognizedObjectObservation) {
+        //Gets bounding box
         let boundingBox = object.boundingBox
         let objectCenter = CGPoint(x: boundingBox.midX, y: boundingBox.midY)
         let currentTime = Date()
 
-
+        //Tracks time between where object was previously to current time
         if let previousPos = previousPosition, let previousTime = previousTimestamp {
             let timeInterval = currentTime.timeIntervalSince(previousTime)
             let elapsedTime = currentTime.timeIntervalSince(startTime)
 
-
+            //Tracks velocity by storing the distance traveled divided by time elapsed
             let dx = objectCenter.x - previousPos.x
             let dy = objectCenter.y - previousPos.y
             let velocity = sqrt(dx * dx + dy * dy) / timeInterval
             let acceleration = (velocity - (sqrt(previousPos.x * previousPos.x + previousPos.y * previousPos.y) / timeInterval)) / timeInterval
 
-
+            //Stores velocity/motion data
             DispatchQueue.main.async {
                 self.velocityData.append((time: elapsedTime, value: velocity))
                 self.accelerationData.append((time: elapsedTime, value: acceleration))
@@ -162,26 +175,4 @@ class VisionProcessor: ObservableObject {
         previousPosition = objectCenter
         previousTimestamp = currentTime
     }
-
-
-    // Allows user to select an object by tapping
-//    func selectObject(at point: CGPoint, screenSize: CGSize) {
-//        let tappedPoint = CGPoint(x: point.x / screenSize.width, y: 1 - (point.y / screenSize.height)) // Convert coordinate system
-//
-//        DispatchQueue.main.async {
-//            print("Tap at: \(tappedPoint)")
-//            
-//            for object in self.detectedObjects {
-//                let boundingBox = object.boundingBox
-//                print("Checking Object: \(object.labels.first?.identifier ?? "Unknown"), Box: \(boundingBox)")
-//                
-//                if object.boundingBox.contains(tappedPoint) {
-//                    self.selectedObject = object
-//                    print("Selected object: \(object.labels.first?.identifier ?? "Unknown")")
-//                    return
-//                }
-//            }
-//            print("No object found at tap location")
-//        }
-//    }
 }

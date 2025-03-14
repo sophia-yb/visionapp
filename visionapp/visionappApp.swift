@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct visionappApp: App {
+    @MainActor @StateObject private var visionProcessor  = VisionProcessor()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(visionProcessor)
         }
     }
 }

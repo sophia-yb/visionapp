@@ -12,7 +12,7 @@ import AVFoundation
 struct CameraPreview: UIViewRepresentable {
     let previewLayer: AVCaptureVideoPreviewLayer
 
-
+    //Creates the UI camera view
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         previewLayer.videoGravity = .resizeAspectFill
@@ -20,7 +20,7 @@ struct CameraPreview: UIViewRepresentable {
         return view
     }
 
-
+    //Updates view if started/stopped
     func updateUIView(_ uiView: UIView, context: Context) {
         DispatchQueue.main.async {
             self.previewLayer.frame = uiView.bounds

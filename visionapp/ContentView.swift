@@ -7,11 +7,13 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
 
 
 struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
-    @StateObject var visionProcessor = VisionProcessor()
+    @EnvironmentObject var visionProcessor: VisionProcessor
+    @State private var forceRefresh = false
     
     // Motion Data
     @State private var velocityData: [(time: Double, value: Double)] = []
@@ -30,27 +32,48 @@ struct ContentView: View {
                 Text("Camera not available")
             }
             
-            let screenSize = UIScreen.main.bounds.size
+            //let screenSize = UIScreen.main.bounds.size
             
             VStack {
-                Text("Detected Objects: \(visionProcessor.detectedObjects.count)")
+                //Displays detected object count in UI
+                Text("Detected Objects: \(visionProcessor.detectedObjectsList.objects.count)")
                     .foregroundColor(.white)
                     .padding()
                 
-                if visionProcessor.detectedObjects.isEmpty {
+                //These statements are mainly for debugging - testing if objects from VisionProcessor transfer to the UI
+                .onAppear {
+                    print("🟢 UI Appeared - detectedObjects count: \(visionProcessor.detectedObjectsList.objects.count)")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        print("🟢 UI Checking detectedObjects after 2s: \(visionProcessor.detectedObjectsList.objects)")
+                        }
+                }
+                .onChange(of: visionProcessor.detectedObjectsList.objects) { newObjects in
+                    DispatchQueue.main.async {
+                        print("🟢 UI Detected Change - detectedObjects count: \(newObjects.count)")
+                        forceRefresh.toggle()
+                    }
+                }
+                .onReceive(visionProcessor.objectWillChange) { _ in
+                    print("🔄 SwiftUI received objectWillChange signal!")
+                }
+                .onReceive(Just(visionProcessor.detectedObjectsList.objects).removeDuplicates()) { objects in
+                    print("📢 Just() triggered detectedObjects update: \(objects.count) objects")
+                }
+
+
+                //Prints detected objects by UI
+                if visionProcessor.detectedObjectsList.objects.isEmpty {
                     Text("❌ No objects detected").foregroundColor(.red)
                 } else {
-                    ForEach(Array(visionProcessor.detectedObjects), id: \.id) { object in
+                    ForEach(Array(visionProcessor.detectedObjectsList.objects), id: \.id) { object in
                         Text("📦 Detected object: \(object.label)")
                     }
                 }
             }
         }
+        //Stops and starts the camera session
         .onAppear {
             Task {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    print("🟢 UI Checking Detected Objects (Inside ContentView): \(visionProcessor.detectedObjects)")
-                }
                 await cameraManager.setUpCaptureSession()
                 cameraManager.startSession()
             }

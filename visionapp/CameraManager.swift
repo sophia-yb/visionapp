@@ -36,6 +36,7 @@ class CameraManager: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         }
     }
     
+    //Updates the frames multiple times per second
     func updatePreviewLayerFrame() {
         DispatchQueue.main.async {
             guard let previewLayer = self.previewLayer else {return}
